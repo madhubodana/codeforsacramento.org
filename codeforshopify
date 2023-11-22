@@ -1,0 +1,1436 @@
+
+ =========================================================================  
+1. Add to cart product in product detail page
+
+
+ {% if product.metafields.custom.blocks != blank%}
+               {% assign  my_metafield = product.metafields.custom.blocks.value %}
+                    {% for product in  my_metafield %}
+                      {% if  my_metafield %}
+                        <div class="custom-product" id="{{product.variants.first.id}}">
+                          <span href="{{ product.url }}"><img src="{{  product | image_url }}"></span>
+                        </div>
+                      {% endif %}
+                <input type="hidden" name="items[{{ product.id }}][id]" value="{{product.variants.first.id}}">
+                    {% endfor %}
+               {% endif %}
+         <button id="add-to-cart-btn" class="add-to-cart" data-variant-id="{{product.variants.first.id}}"  type="submit">Add to Cart</button>
+       </button>
+
+    
+<script>
+            $(document).ready(function(){
+            $('#add-to-cart-btn').click(function() {
+           var v = $(".custom-product.active").attr('id');
+             console.log(v);
+              var quantity = 1;
+              var data = {
+                'id': v,
+                'quantity': quantity
+              };
+               $.ajax({
+                type: 'POST',
+                url: '/cart/add.js',
+                data: data,
+                dataType: 'json',
+                success: function(response) {
+                 window.location.href = '/cart';
+                  },
+                error: function(xhr, textStatus, errorThrown) {
+                  console.log(xhr.responseText);
+                  alert('Product is sold Out ' + errorThrown);
+                }
+              });
+            });
+            });
+
+        $(document).ready(function() {
+        $('.custom-product').click(function() {
+           $(this).removeClass('active');
+          $(this).addClass('active');
+          $("#add-to-cart-btn").submit();
+        });
+      });
+    </script>
+=======================================================================
+
+
+2. get selected product to cart page 
+
+
+ {% if product.metafields.custom.blocks != blank%}
+               {% assign  my_metafield = product.metafields.custom.blocks.value %}
+                    {% for product in  my_metafield %}
+                      {% if  my_metafield %}
+                        <div class="custom-product" id="{{product.variants.first.id}}">
+                          <span href="{{ product.url }}"><img src="{{  product | image_url }}"></span>
+                    <input type="checkbox" name="product-2" value="{{product.variants.first.id}}"> 
+                        </div>
+
+
+
+                      {% endif %}
+                <input type="hidden" name="items[{{ product.id }}][id]" value="{{product.variants.first.id}}">
+                    {% endfor %}
+               {% endif %}
+         <button id="add-to-cart-btn" class="add-to-cart" data-variant-id="{{product.variants.first.id}}"  type="submit">Add to Cart</button>
+       </button>
+
+
+<script>
+        $(document).ready(function() {
+        $('#add-to-cart-btn').click(function() {
+          var products = [];
+          $('.custom-product input:checked').each(function() {
+            var id = $(this).val();
+            var quantity = 1;
+            var data = {
+              'id': id,
+              'quantity': quantity
+            };
+            products.push(data);
+          });
+          if (products.length > 0) {
+            $.ajax({
+              type: 'POST',
+              url: '/cart/add.js',
+              data: { 'items': products },
+              dataType: 'json',
+              success: function(response) {
+                window.location.href = '/cart';
+              },
+              error: function(xhr, textStatus, errorThrown) {
+                console.log(xhr.responseText);
+                alert('Error: ' + errorThrown);
+              }
+            });
+          } else {
+            alert('Please select at least one product.');
+          }
+        });
+      });
+    </script>
+
+
+
+
+
+======================================================================
+3. get current product with selectedproduct
+
+
+ <script>
+        $(document).ready(function(){
+          $('.check').click(function(){
+              if(quantity > 1){
+                   alert('product is sold out');
+                 }
+            else{
+              alert('product is');
+            }
+            });
+         });
+
+
+
+          $(document).ready(function() {
+          $('.product-form__submit').click(function() {
+            var products = [];
+            $('.custom-product input:checked').each(function() {
+              var id = $(this).val();
+
+              var add = $(this).closest('.custom-product').find('[data-variant-id]').attr('data-variant-id');            var quantity = 1;
+              var data = {
+                'id': id,
+                'add': add,
+                'quantity': quantity
+              };
+              products.push(data);
+            });
+                var currentProduct = {
+              'id': $('[name="id"]').val(),
+               'quantity': 1
+                };
+      products.push(currentProduct);
+            if (products.length > 0) {
+              $.ajax({
+                type: 'POST',
+                url: '/cart/add.js',
+                data: { 'items': products },
+                dataType: 'json',
+                success: function(response) {
+                  window.location.href = '/cart';
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                  console.log(xhr.responseText);
+                  alert('Error:' + errorThrown);
+                }
+              });
+            }
+          });
+        });
+
+
+
+
+=================================================================
+
+
+4. print input form product to cart page
+
+     <label for="Comment">Your Comment:</label>
+            <textarea id="Comment" type="text" name="properties[Comment]" form="{{ product_form_id }}"></textarea>
+
+
+=====================================================================
+
+
+
+
+=================================================================
+
+5. show only selected varient image
+
+
+
+<media-gallery
+  id="MediaGallery-{{ section.id }}{{ id_append }}"
+  role="region"
+  {% if section.settings.enable_sticky_info %}
+    class="product__column-sticky"
+  {% endif %}
+  aria-label="{{ 'products.product.media.gallery_viewer' | t }}"
+  data-desktop-layout="{{ section.settings.gallery_layout }}"
+>
+  <div id="GalleryStatus-{{ section.id }}" class="visually-hidden" role="status"></div>
+  <slider-component id="GalleryViewer-{{ section.id }}{{ id_append }}" class="slider-mobile-gutter">
+    {%- unless is_duplicate -%}
+      <a class="skip-to-content-link button visually-hidden quick-add-hidden" href="#ProductInfo-{{ section.id }}">
+        {{ 'accessibility.skip_to_product_info' | t }}
+      </a>
+    {%- endunless -%}
+
+    <ul
+      id="Slider-Gallery-{{ section.id }}{{ id_append }}"
+      class="product__media-list contains-media grid grid--peek list-unstyled slider slider--mobile"
+      role="list"
+    >
+      {%- if product.selected_or_first_available_variant.featured_media != null -%}
+        {%- assign featured_media = product.selected_or_first_available_variant.featured_media -%}
+
+        <li
+          {% if featured_media.alt != blank and featured_media.alt != featured_media.alt %}
+            style="display: none"
+          {% endif %}
+          thumbnail-color="{{ featured_media.alt }}"
+          id="Slide-{{ section.id }}-{{ featured_media.id }}{{ id_append }}"
+          class="product__media-item grid__item slider__slide is-active{% if single_media_visible %} product__media-item--single{% endif %}{% if featured_media.media_type != 'image' %} product__media-item--full{% endif %}{% if section.settings.hide_variants and variant_images contains featured_media.src %} product__media-item--variant{% endif %}"
+          data-media-id="{{ section.id }}-{{ featured_media.id }}"
+        >
+          {%- assign media_position = 1 -%}
+          {% render 'product-thumbnail',
+            media: featured_media,
+            media_count: media_count,
+            position: media_position,
+            desktop_layout: section.settings.gallery_layout,
+            mobile_layout: section.settings.mobile_thumbnails,
+            loop: section.settings.enable_video_looping,
+            modal_id: section.id,
+            xr_button: true,
+            media_width: media_width,
+            media_fit: section.settings.media_fit,
+            constrain_to_viewport: section.settings.constrain_to_viewport,
+            lazy_load: false
+          %}
+        </li>
+      {%- endif -%}
+      {%- for media in product.media -%}
+        {%- unless media.id == product.selected_or_first_available_variant.featured_media.id -%}
+          <li
+            {% if media.alt != blank and product.selected_or_first_available_variant.featured_media.alt != media.alt %}
+              style="display: none"
+            {% endif %}
+            id="Slide-{{ section.id }}-{{ media.id }}{{ id_append }}"
+            data-title="{{ image.alt | escape }}"
+            thumbnail-color="{{ media.alt }}"
+            class="product__media-item grid__item slider__slide{% if single_media_visible %} product__media-item--single{% endif %}{% if product.selected_or_first_available_variant.featured_media == null and forloop.index == 1 %} is-active{% endif %}{% if media.media_type != 'image' %} product__media-item--full{% endif %}{% if section.settings.hide_variants and variant_images contains media.src %} product__media-item--variant{% endif %}"
+            data-media-id="{{ section.id }}-{{ media.id }}"
+          >
+            {%- liquid
+              assign media_position = media_position | default: 0 | plus: 1
+              assign lazy_load = false
+              if media_position > 1
+                assign lazy_load = true
+              endif
+            -%}
+            {% render 'product-thumbnail',
+              media: media,
+              media_count: media_count,
+              position: media_position,
+              desktop_layout: section.settings.gallery_layout,
+              mobile_layout: section.settings.mobile_thumbnails,
+              loop: section.settings.enable_video_looping,
+              modal_id: section.id,
+              xr_button: true,
+              media_width: media_width,
+              media_fit: section.settings.media_fit,
+              constrain_to_viewport: section.settings.constrain_to_viewport,
+              lazy_load: lazy_load
+            %}
+          </li>
+        {%- endunless -%}
+      {%- endfor -%}
+    </ul>
+    {%- unless is_duplicate -%}
+      <div class="slider-buttons no-js-hidden quick-add-hidden{% if hide_mobile_slider %} small-hide{% endif %}">
+        <button
+          type="button"
+          class="slider-button slider-button--prev"
+          name="previous"
+          aria-label="{{ 'general.slider.previous_slide' | t }}"
+        >
+          {% render 'icon-caret' %}
+        </button>
+        <div class="slider-counter caption">
+          <span class="slider-counter--current">1</span>
+          <span aria-hidden="true"> / </span>
+          <span class="visually-hidden">{{ 'general.slider.of' | t }}</span>
+          <span class="slider-counter--total">{{ media_count }}</span>
+        </div>
+        <button
+          type="button"
+          class="slider-button slider-button--next"
+          name="next"
+          aria-label="{{ 'general.slider.next_slide' | t }}"
+        >
+          {% render 'icon-caret' %}
+        </button>
+      </div>
+    {%- endunless -%}
+  </slider-component>
+  {%- if first_3d_model -%}
+    <button
+      class="button button--full-width product__xr-button"
+      type="button"
+      aria-label="{{ 'products.product.xr_button_label' | t }}"
+      data-shopify-xr
+      data-shopify-model3d-id="{{ first_3d_model.id }}"
+      data-shopify-title="{{ product.title | escape }}"
+      data-shopify-xr-hidden
+    >
+      {% render 'icon-3d-model' %}
+      {{ 'products.product.xr_button' | t }}
+    </button>
+  {%- endif -%}
+  {%- if media_count > 1
+    and section.settings.gallery_layout contains 'thumbnail'
+    or section.settings.mobile_thumbnails == 'show'
+  -%}
+    <slider-component
+      id="GalleryThumbnails-{{ section.id }}{{ id_append }}"
+      class="thumbnail-slider slider-mobile-gutter quick-add-hidden{% unless section.settings.gallery_layout contains 'thumbnail' %} medium-hide large-up-hide{% endunless %}{% if section.settings.mobile_thumbnails != 'show' %} small-hide{% endif %}{% if media_count <= 3 %} thumbnail-slider--no-slide{% endif %}"
+    >
+      <button
+        type="button"
+        class="slider-button slider-button--prev{% if media_count <= 3 %} small-hide{% endif %}{% if media_count <= 4 %} medium-hide large-up-hide{% endif %}"
+        name="previous"
+        aria-label="{{ 'general.slider.previous_slide' | t }}"
+        aria-controls="GalleryThumbnails-{{ section.id }}"
+        data-step="3"
+      >
+        {% render 'icon-caret' %}
+      </button>
+      <ul
+        id="Slider-Thumbnails-{{ section.id }}{{ id_append }}"
+        class="thumbnail-list list-unstyled slider slider--mobile{% if section.settings.gallery_layout == 'thumbnail_slider' %} slider--tablet-up{% endif %}"
+      >
+        {%- capture sizes -%}
+          (min-width: {{ settings.page_width }}px) calc(({{ settings.page_width | minus: 100 | times: media_width | round }} - 4rem) / 4),
+          (min-width: 990px) calc(({{ media_width | times: 100 }}vw - 4rem) / 4),
+          (min-width: 750px) calc((100vw - 15rem) / 8),
+          calc((100vw - 8rem) / 3)
+        {%- endcapture -%}
+
+        {%- if featured_media != null -%}
+          {%- liquid
+            capture media_index
+              if featured_media.media_type == 'model'
+                increment model_index
+              elsif featured_media.media_type == 'video' or featured_media.media_type == 'external_video'
+                increment video_index
+              elsif featured_media.media_type == 'image'
+                increment image_index
+              endif
+            endcapture
+            assign media_index = media_index | plus: 1
+          -%}
+          <li
+            {% if featured_media.alt != blank and featured_media.alt != featured_media.alt %}
+              style="display: none"
+            {% endif %}
+            thumbnail-color="{{ featured_media.alt }}"
+            id="Slide-Thumbnails-{{ section.id }}-0{{ id_append }}"
+            class="thumbnail-list__item slider__slide{% if section.settings.hide_variants and variant_images contains featured_media.src %} thumbnail-list_item--variant{% endif %}"
+            data-target="{{ section.id }}-{{ featured_media.id }}"
+            data-media-position="{{ media_index }}"
+          >
+            {%- capture thumbnail_id -%}
+              Thumbnail-{{ section.id }}-0{{ id_append }}
+            {%- endcapture -%}
+            <button
+              class="thumbnail global-media-settings global-media-settings--no-shadow"
+              aria-label="{%- if featured_media.media_type == 'image' -%}{{ 'products.product.media.load_image' | t: index: media_index }}{%- elsif featured_media.media_type == 'model' -%}{{ 'products.product.media.load_model' | t: index: media_index }}{%- elsif featured_media.media_type == 'video' or featured_media.media_type == 'external_video' -%}{{ 'products.product.media.load_video' | t: index: media_index }}{%- endif -%}"
+              aria-current="true"
+              aria-controls="GalleryViewer-{{ section.id }}{{ id_append }}"
+              aria-describedby="{{ thumbnail_id }}"
+            >
+              {{
+                featured_media.preview_image
+                | image_url: width: 416
+                | image_tag:
+                  loading: 'lazy',
+                  sizes: sizes,
+                  widths: '54, 74, 104, 162, 208, 324, 416',
+                  id: thumbnail_id,
+                  alt: featured_media.alt
+                | escape
+              }}
+            </button>
+          </li>
+        {%- endif -%}
+        {%- for media in product.media -%}
+          {%- unless media.id == product.selected_or_first_available_variant.featured_media.id -%}
+            {%- liquid
+              capture media_index
+                if media.media_type == 'model'
+                  increment model_index
+                elsif media.media_type == 'video' or media.media_type == 'external_video'
+                  increment video_index
+                elsif media.media_type == 'image'
+                  increment image_index
+                endif
+              endcapture
+              assign media_index = media_index | plus: 1
+            -%}
+            <li
+              {% if media.alt != blank and product.selected_or_first_available_variant.media.alt != media.alt %}
+                style="display: none"
+              {% endif %}
+              thumbnail-color="{{ media.alt }}"
+              id="Slide-Thumbnails-{{ section.id }}-{{ forloop.index }}{{ id_append }}"
+              class="thumbnail-list__item slider__slide{% if section.settings.hide_variants and variant_images contains media.src %} thumbnail-list_item--variant{% endif %}"
+              data-target="{{ section.id }}-{{ media.id }}"
+              data-media-position="{{ media_index }}"
+            >
+              {%- if media.media_type == 'model' -%}
+                <span class="thumbnail__badge" aria-hidden="true">
+                  {%- render 'icon-3d-model' -%}
+                </span>
+              {%- elsif media.media_type == 'video' or media.media_type == 'external_video' -%}
+                <span class="thumbnail__badge" aria-hidden="true">
+                  {%- render 'icon-play' -%}
+                </span>
+              {%- endif -%}
+              {%- capture thumbnail_id -%}
+                Thumbnail-{{ section.id }}-{{ forloop.index }}{{ id_append }}
+              {%- endcapture -%}
+              <button
+                class="thumbnail global-media-settings global-media-settings--no-shadow"
+                aria-label="{%- if media.media_type == 'image' -%}{{ 'products.product.media.load_image' | t: index: media_index }}{%- elsif media.media_type == 'model' -%}{{ 'products.product.media.load_model' | t: index: media_index }}{%- elsif media.media_type == 'video' or media.media_type == 'external_video' -%}{{ 'products.product.media.load_video' | t: index: media_index }}{%- endif -%}"
+                {% if media == product.selected_or_first_available_variant.featured_media
+                  or product.selected_or_first_available_variant.featured_media == null
+                  and forloop.index == 1
+                %}
+                  aria-current="true"
+                {% endif %}
+                aria-controls="GalleryViewer-{{ section.id }}{{ id_append }}"
+                aria-describedby="{{ thumbnail_id }}"
+              >
+                {{
+                  media.preview_image
+                  | image_url: width: 416
+                  | image_tag:
+                    loading: 'lazy',
+                    sizes: sizes,
+                    widths: '54, 74, 104, 162, 208, 324, 416',
+                    id: thumbnail_id,
+                    alt: media.alt
+                  | escape
+                }}
+              </button>
+            </li>
+          {%- endunless -%}
+        {%- endfor -%}
+      </ul>
+      <button
+        type="button"
+        class="slider-button slider-button--next{% if media_count <= 3 %} small-hide{% endif %}{% if media_count <= 4 %} medium-hide large-up-hide{% endif %}"
+        name="next"
+        aria-label="{{ 'general.slider.next_slide' | t }}"
+        aria-controls="GalleryThumbnails-{{ section.id }}"
+        data-step="3"
+      >
+        {% render 'icon-caret' %}
+      </button>
+    </slider-component>
+  {%- endif -%}
+</media-gallery>
+
+
+==== global.js  =====
+
+
+   ====this.filterMedia(); ==814=
+
+===821
+
+filterMedia() {
+    
+         $('[thumbnail-color]').hide();
+    
+    var selected_variant = this.currentVariant.featured_media.alt;
+    var selected_attribute = '[thumbnail-color="' + selected_variant + '"]';
+      console.log(selected_attribute);
+    if (selected_variant == selected_variant) {
+      
+      $(selected_attribute).show();
+
+    } 
+}
+
+
+===================================================
+
+
+
+if product is sold out condition
+
+ {%- if product.selected_or_first_available_variant.available == false or quantity_rule_soldout -%}disabled {% endif %}
+
+==============================================
+
+
+==========================================================
+If STATIC HEADER IS HAVE TOP TO BOTTUM JS
+
+       $( '.read-more-button a' ).on( 'click', function(e){  
+    var href = $(this).attr( 'href' );  
+    $( 'html, body' ).animate({
+  		scrollTop: $( href ).offset().top - 100
+    }, 700 );  
+    e.preventDefault();
+  }); 
+
+
+  ====================================================
+
+
+
+
+==================================================================
+
+Add Icon  owl slider
+
+<script>
+  $('.home-demo .owl-carousel').owlCarousel({
+      loop: true,
+      dots:false,
+      responsiveClass:true,
+      nav: true,
+      autoplay:true,
+      items : 1,
+      animateIn: 'fadeIn',
+      autoplayTimeout:5000,
+      autoplayHoverPause:true,
+      navText: [
+          "<i class='fas fa-chevron-circle-left'></i>",
+          "<i class='fas fa-chevron-circle-right'></i>"
+      ],
+      responsive:{
+          0:{
+              items:1,
+              nav:true
+          },
+          600:{
+              items:1,
+              nav:true
+          },
+          1000:{
+              items:1,
+              nav:true
+          }
+      }
+  })
+</script>
+
+=================================================================
+
+Add multiple metafield in array
+
+<div class="home-section product-slider-mini">
+  <div class="home-demo">
+    <div class="owl-carousel owl-theme ">
+      {% for collection in product.collections %}
+        <div class="item">
+          {% if product.metafields.custom.product_mini_slider_image != blank %}
+            {% assign array_of_spec-img = product.metafields.custom.product_mini_slider_image.value %}
+            {% if array_of_spec-img %}
+              {{ product.metafields.custom.product_mini_slider_image.size }}
+              {% for image_spec-img in array_of_spec-img %}
+                {% if forloop.index == 1 %}
+                  {% assign image_one = image_spec-img %}
+                {% endif %}
+                {% if forloop.index == 2 %}
+                  {% assign image_two = image_spec-img %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+
+            <img src="{{ image_one | img }}" loading="lazy" alt="">
+
+          {% else %}
+            <img src="{{ block.settings.product-mini_image_1 | img_url: 'master' }}" loading="lazy" alt="">
+          {% endif %}
+
+          <div class="h2_text_div">
+            {% if product.metafields.custom.product_slider_title != blank %}
+              <h2 class="product-slider__heading h1">{{ product.metafields.custom.product_slider_title }}</h2>
+            {% else %}
+              <h2 class="product-slider__heading h1">{{ block.settings['product-mini_heading_1'] | escape }}</h2>
+            {% endif %}
+
+            {% if product.metafields.custom.product_slider_sub_title != blank %}
+              <p class="product-slider-sub-heading1">{{ product.metafields.custom.product_slider_sub_title }}</p>
+            {% else %}
+              <p class="product-slider-sub-heading1">{{ block.settings['product-mini_sub_heading_1'] | escape }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="item">
+          <img src="{{ image_two | img_url: 'master' }}" loading="lazy" alt="">
+          <div class="h2_text_div">
+            <h2 class="product-slider__heading h1">{{ block.settings['product-mini_heading_2'] | escape }}</h2>
+            <p class="product-slider-sub-heading1">{{ block.settings['product-mini_sub_heading_2'] | escape }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+=================================================================
+
+Only first time show popup  Local storage
+
+
+<style type="text/css">
+   #ac-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, .6);
+      z-index: 1001;
+  }
+  #popup {
+      width: 555px;
+      height: 375px;
+      background: #FFFFFF;
+      border: 5px solid #000;
+      border-radius: 25px;
+      -moz-border-radius: 25px;
+      -webkit-border-radius: 25px;
+      box-shadow: #64686e 0px 0px 3px 3px;
+      -moz-box-shadow: #64686e 0px 0px 3px 3px;
+      -webkit-box-shadow: #64686e 0px 0px 3px 3px;
+      position: relative;
+      top: 150px;
+      left: 375px;
+  }
+
+
+  div#popup {
+      padding: 0 0 12px 0;
+      margin-bottom: 15px;
+      height: auto;
+      background: #f9f9f9;
+      border-radius: 7px;
+      -moz-border-radius: 7px;
+      -webkit-border-radius: 7px;
+      box-shadow: 0px 2px 4px rgb(0 0 0 / 25%), 0px 2px 0px white inset;
+  }
+
+  h1.logo {
+      display: contents;
+  }
+
+  div#popup .block.newsletter {
+      max-width: 100%;
+      width: 100%;
+  }
+
+  div#popup .block.newsletter .form.subscribe .actions button.action.subscribe.primary {
+  /*    position: relative;
+      left: 0;
+      top: 0;*/
+  /*    display: none;
+  */}
+  #ac-wrapper select#select-opt {
+      position: relative;
+      top: -24px;
+      border: 0;
+      bottom: 18px;
+      left: 0;
+      border: 1px solid #ececec;
+  }
+
+  #ac-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, .6);
+      z-index: 1001;
+      background: #222222 url(https://yesthanks.com.au/skin/frontend/default/grey_theme/images/green-bg.jpg) no-repeat center center;
+  }
+  button#ok {
+      background: #aa3b18;
+      margin-top: 12px;
+  }
+  a#ok {
+      margin-right: 45px;
+  }
+</style>
+
+<script type="text/javascript" src="scripts/jquery.cookies.2.2.0.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script type="text/javascript">
+  function showPopup() {
+    PopUp('show');
+  }
+
+  function setFirstVisitFlag() {
+    localStorage.setItem('firstVisit', 'true');
+  }
+
+  function isFirstVisit() {
+    return localStorage.getItem('firstVisit') !== 'true';
+  }
+
+  function PopUp(hideOrshow) {
+    var popupWrapper = document.getElementById('ac-wrapper');
+    if (hideOrshow === 'hide') {
+      popupWrapper.style.display = 'none';
+    } else {
+      popupWrapper.removeAttribute('style');
+    }
+  }
+
+  $(document).ready(function() {
+    if (isFirstVisit()) {
+      showPopup();
+      setFirstVisitFlag();
+    }
+
+    $('#ok12').on('click', function() {
+      PopUp('hide');
+    });
+  });
+</script>
+<div id="ac-wrapper" style="display:none">
+  <div id="popup">
+    <center>
+      <div id="subscribe-top">
+        <div id="logo_container">
+          <h1 class="logo">
+            <a href="/"
+              ><img
+                src="https://dummy-little-fashionista.myshopify.com/cdn/shop/files/Gray_Logo_No_Fill_58a8d709-045b-4fe2-9f75-c23144d42bad_300x300_1.png?v=1678692549&width=500"
+                alt="logo"
+                title="Logo"
+                loading="lazy"
+                width="80px"
+                height="80px"
+                ;
+            ></a>
+          </h1>
+        </div>
+        <h4>Subscribe for Newsletter</h4>
+      </div>
+
+      <a type="submit" name="Maybe Later!" id="ok12" value="Submit" onClick="PopUp('hide')">Maybe Later!</a>
+    </center>
+  </div>
+</div>
+
+<script type="text/javascript">
+  // $(document).ready(function() {
+  //   $('#ok12').on('click', function() {
+  //     setSessionFlag();
+  //     PopUp('hide');
+  //   });
+  // });
+
+  // function PopUp(hideOrshow) {
+  //   var popupWrapper = document.getElementById('ac-wrapper');
+  //   if (hideOrshow === 'hide') {
+  //     popupWrapper.style.display = 'none';
+  //   } else {
+  //     popupWrapper.removeAttribute('style');
+  //   }
+  // }
+</script>
+
+<!--
+  <script type="text/javascript">
+  jquery(document).ready(function() {
+      if(localStorage.getItem('popState') != 'shown'){
+          jquery("#popup").delay(2000).fadeIn();
+          localStorage.setItem('popState','shown')
+      }
+      jquery('#ok, #popup').click(function(e) // You are clicking the close button
+      {
+          jquery('#popup').fadeOut(); // Now the pop up is hiden.
+      });
+  });
+  </script>
+-->
+
+{% schema %}
+{
+  "name": "popup",
+  "settings": [
+    {
+      "type": "text",
+      "id": "name",
+      "label": "heading"
+    }
+  ],
+  "presets": [
+    {
+      "name": "popup"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+{% endstylesheet %}
+
+{% javascript %}
+{% endjavascript %}
+
+==================================================================
+
+
+Popup show  one time by cookie
+
+<style type="text/css">
+   #ac-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, .6);
+      z-index: 1001;
+  }
+  #popup {
+      width: 555px;
+      height: 375px;
+      background: #FFFFFF;
+      border: 5px solid #000;
+      border-radius: 25px;
+      -moz-border-radius: 25px;
+      -webkit-border-radius: 25px;
+      box-shadow: #64686e 0px 0px 3px 3px;
+      -moz-box-shadow: #64686e 0px 0px 3px 3px;
+      -webkit-box-shadow: #64686e 0px 0px 3px 3px;
+      position: relative;
+      top: 150px;
+      left: 375px;
+  }
+
+
+  div#popup {
+      padding: 0 0 12px 0;
+      margin-bottom: 15px;
+      height: auto;
+      background: #f9f9f9;
+      border-radius: 7px;
+      -moz-border-radius: 7px;
+      -webkit-border-radius: 7px;
+      box-shadow: 0px 2px 4px rgb(0 0 0 / 25%), 0px 2px 0px white inset;
+  }
+
+  h1.logo {
+      display: contents;
+  }
+
+  div#popup .block.newsletter {
+      max-width: 100%;
+      width: 100%;
+  }
+
+  div#popup .block.newsletter .form.subscribe .actions button.action.subscribe.primary {
+  /*    position: relative;
+      left: 0;
+      top: 0;*/
+  /*    display: none;
+  */}
+  #ac-wrapper select#select-opt {
+      position: relative;
+      top: -24px;
+      border: 0;
+      bottom: 18px;
+      left: 0;
+      border: 1px solid #ececec;
+  }
+
+  #ac-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, .6);
+      z-index: 1001;
+      background: #222222 url(https://yesthanks.com.au/skin/frontend/default/grey_theme/images/green-bg.jpg) no-repeat center center;
+  }
+  button#ok {
+      background: #aa3b18;
+      margin-top: 12px;
+  }
+  a#ok {
+      margin-right: 45px;
+  }
+</style>
+
+<script type="text/javascript" src="scripts/jquery.cookies.2.2.0.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script type="text/javascript" language="javascript">
+  function setCookie(cname, cvalue, exdays) {
+          var d = new Date();
+          d.setTime(d.getTime() + (exdays*24*60*60*1000));
+          var expires = "expires="+d.toUTCString();
+          document.cookie = cname + "=" + cvalue + "; " + expires;
+
+
+        }
+  function showCookie(){
+      document.write(document.cookie);
+  }
+
+  function getCookie(user) {
+      var cookieArr = document.cookie.split(";");
+      for(var i = 0; i < cookieArr.length; i++) {
+          var cookiePair = cookieArr[i].split("=");
+          if(user == cookiePair[0].trim()) {
+              return decodeURIComponent(cookiePair[1]);
+          }
+      }
+      return null;
+  }
+
+
+  $(window).ready(function(){
+     checkCookie();
+  });
+
+  if(getCookie("clicklink1")){
+  }
+  else{
+          window.onload = function () {
+      setTimeout(function () {
+          PopUp('show');
+      }, 1000);
+  }
+  }
+</script>
+
+<div id="ac-wrapper" style="display:none">
+  <div id="popup">
+    <center>
+      <div id="subscribe-top">
+        <div id="logo_container">
+          <h1 class="logo">
+            <a href="/"
+              ><img
+                src="https://dummy-little-fashionista.myshopify.com/cdn/shop/files/Gray_Logo_No_Fill_58a8d709-045b-4fe2-9f75-c23144d42bad_300x300_1.png?v=1678692549&width=500"
+                alt="logo"
+                title="Logo"
+                loading="lazy"
+                width="80px"
+                height="80px"
+                ;
+            ></a>
+          </h1>
+        </div>
+        <h4>Subscribe for Newsletter</h4>
+      </div>
+
+      <a type="submit" name="Maybe Later!" id="ok12" value="Submit" onClick="PopUp('hide')">Maybe Later!</a>
+    </center>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+   $('#ok12').on('click', function(){
+      setCookie('clicklink1', 'yes', 30)
+   });
+  });
+
+    function PopUp(hideOrshow) {
+      if (hideOrshow == 'hide') document.getElementById('ac-wrapper').style.display = "none";
+      else document.getElementById('ac-wrapper').removeAttribute('style');
+  }
+
+</script>
+
+
+==================================================
+
+change password to text
+
+change input class to so span class and icon id to input id
+https://codepen.io/Sohail05/pen/yOpeBm
+
+=================================================
+
+
+
+
+
+=================================================
+
+add scroll navigation 
+
+<style>
+    /* menu css  */
+  .menu_side_inner #toc_menu {
+    display: block;
+  }
+
+  #toc_menu {
+    display: none;
+    margin: 0;
+    position: fixed;
+    right: 0;
+    top: 35%;
+    width: 70px;
+  }
+
+  #toc_menu .toc_menu_item {
+    position: relative;
+    z-index: 1;
+  }
+  #toc_menu .toc_menu_icon {
+    display: block;
+    position: relative;
+    height: 1.5em;
+    padding-bottom: 2.2em;
+  }
+  #toc_menu .toc_menu_icon_default:before {
+    content: "\e8c0";
+  }
+  .toc_menu_item.toc_menu_item_active:after {
+    content: "";
+    width: 35%;
+    height: 59%;
+    margin: 0 auto;
+    position: absolute;
+    left: 0;
+    background-color: red;
+    border-radius: 91%;
+    top: 12px;
+  }
+
+  #toc_menu .toc_menu_icon:before {
+    display: block;
+    width: 34%;
+    position: absolute;
+    top: 12px;
+    margin: 0;
+    background-color: #7fffd4;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    border-radius: 50px;
+    border: 3px solid red;
+  }
+</style>
+{% if section.settings.scroll %}
+  <div class="menu_side_wrap scheme_default">
+    <div class="menu_side_inner">
+      <div id="toc_menu" class="toc_menu inited">
+        <div class="toc_menu_inner">
+          <div class="toc_menu_item" data-id="welcome">
+            <a
+              href="#shopify-section-template--15773636624579__image_banner"
+              class="toc_menu_icon toc_menu_icon_default"
+            ></a>
+          </div>
+          <div class="toc_menu_item" data-id="services">
+            <a
+              href="#shopify-section-template--15773636624579__featured_collection"
+              class="toc_menu_icon toc_menu_icon_default"
+            ></a>
+          </div>
+          <div class="toc_menu_item" data-id="testimonials">
+            <a
+              href="#shopify-section-template--15773636624579__b3b9de4c-05eb-4406-a84b-2249c033719f"
+              class="toc_menu_icon toc_menu_icon_default"
+            ></a>
+          </div>
+          <div class="toc_menu_item" data-id="staff">
+            <a
+              href="#shopify-section-template--15773636624579__7527e3ba-ce29-4fa3-84d6-ab2f34cb474a"
+              class="toc_menu_icon toc_menu_icon_default"
+            ></a>
+          </div>
+          <div class="toc_menu_item" data-id="prices">
+            <a
+              href="#shopify-section-template--15773636624579__1e6660d8-c0a4-40ff-aa0d-8c5ccc9c80b7"
+              class="toc_menu_icon toc_menu_icon_default"
+            ></a>
+          </div>
+          <div class="toc_menu_item" data-id="shop">
+            <a
+              href="#shopify-section-template--15773636624579__8be51405-3e4f-4fd9-9492-fe22ad6f6cb2"
+              class="toc_menu_icon toc_menu_icon_default"
+            ></a>
+          </div>
+          <div class="toc_menu_item" data-id="appointment">
+            <a
+              href="#shopify-section-template--15773636624579__66e4bb30-8804-4e48-80b6-90e1be8d584d"
+              class="toc_menu_icon toc_menu_icon_default"
+            ></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<script>
+  
+  
+document.addEventListener('DOMContentLoaded', function() {
+const sections = document.querySelectorAll('.content-for-layout'); // Replace with your section class
+const navLinks = document.querySelectorAll('.toc_menu_item'); // Replace with your navigation link class
+const sectionObserver = new IntersectionObserver(function(entries, observer) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const targetSection = entry.target;
+          const sectionId = targetSection.getAttribute('id');
+      //alert(sectionId);
+navLinks.forEach(link => {
+  link.classList.remove('active');
+  if (link.getAttribute('href') === `#${sectionId}`) {
+    link.classList.add('active');
+  }
+});
+           
+        }
+      });
+    });
+
+    sections.forEach(section => {
+      sectionObserver.observe(section);
+    });
+  });
+
+  (document).ready(function(){
+    ('.toc_menu_icon ').click(function(){
+         const sectionId = targetSection.getAttribute('id');
+      alert(sectionId);
+    });
+    
+  });
+
+
+</script>
+{% schema %}
+{
+  "name": "scroll effect",
+  "settings": [
+    {
+    "type": "checkbox",
+      "id": "scroll",
+      "label": "enable-scroll-efect"
+    }
+
+  ],
+  "presets": [
+    {
+    "name": "scroll effect"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+{% endstylesheet %}
+
+{% javascript %}
+{% endjavascript %}
+
+
+=======================================================================
+
+For speed optimization
+<script>
+const uLTS=new MutationObserver(a=>{a.forEach(({addedNodes:a})=>{a.forEach(a=>{1===a.nodeType&&"IFRAME"===a.tagName&&(a.src.includes("youtube.com")||a.src.includes("vimeo.com"))&&(a.setAttribute("loading","lazy"),a.setAttribute("data-src",a.src),a.removeAttribute("src")),1===a.nodeType&&"SCRIPT"===a.tagName&&(("analytics"==a.className||"boomerang"==a.className)&&(a.type="text/lazyload"),a.innerHTML.includes("asyncLoad")&&(a.innerHTML=a.innerHTML.replace("if(window.attachEvent)","document.addEventListener('asyncLazyLoad',function(event){asyncLoad();});if(window.attachEvent)").replaceAll(", asyncLoad",", function(){}")),(a.innerHTML.includes("PreviewBarInjector")||a.innerHTML.includes("adminBarInjector"))&&(a.innerHTML=a.innerHTML.replace("DOMContentLoaded","loadBarInjector")))})})});uLTS.observe(document.documentElement,{childList:!0,subtree:!0})
+  YETT_BLACKLIST = [/klaviyo/,  /payment-sheet/, /shopify_pay/, /rebuyengine/ ]
+  !function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"function"==typeof define&&define.amd?define(["exports"],e):e(t.yett={})}(this,function(t){"use strict";var e={blacklist:window.YETT_BLACKLIST,whitelist:window.YETT_WHITELIST},r={blacklisted:[]},n=function(t,r){return t&&(!r||"javascript/blocked"!==r)&&(!e.blacklist||e.blacklist.some(function(e){return e.test(t)}))&&(!e.whitelist||e.whitelist.every(function(e){return!e.test(t)}))},i=function(t){var r=t.getAttribute("src");return e.blacklist&&e.blacklist.every(function(t){return!t.test(r)})||e.whitelist&&e.whitelist.some(function(t){return t.test(r)})},c=new MutationObserver(function(t){t.forEach(function(t){for(var e=t.addedNodes,i=function(t){var i=e[t];if(1===i.nodeType&&"SCRIPT"===i.tagName){var c=i.src,o=i.type;if(n(c,o)){r.blacklisted.push(i.cloneNode()),i.type="javascript/blocked";i.addEventListener("beforescriptexecute",function t(e){"javascript/blocked"===i.getAttribute("type")&&e.preventDefault(),i.removeEventListener("beforescriptexecute",t)}),i.parentElement.removeChild(i)}}},c=0;c<e.length;c++)i(c)})});c.observe(document.documentElement,{childList:!0,subtree:!0});var o=document.createElement;document.createElement=function(){for(var t=arguments.length,e=Array(t),r=0;r<t;r++)e[r]=arguments[r];if("script"!==e[0].toLowerCase())return o.bind(document).apply(void 0,e);var i=o.bind(document).apply(void 0,e),c=i.setAttribute.bind(i);return Object.defineProperties(i,{src:{get:function(){return i.getAttribute("src")},set:function(t){return n(t,i.type)&&c("type","javascript/blocked"),c("src",t),!0}},type:{set:function(t){var e=n(i.src,i.type)?"javascript/blocked":t;return c("type",e),!0}}}),i.setAttribute=function(t,e){"type"===t||"src"===t?i[t]=e:HTMLScriptElement.prototype.setAttribute.call(i,t,e)},i};var l=function(t){if(Array.isArray(t)){for(var e=0,r=Array(t.length);e<t.length;e++)r[e]=t[e];return r}return Array.from(t)},a=new RegExp("[|\\{}()[\\]^$+*?.]","g");t.unblock=function(){for(var t=arguments.length,n=Array(t),o=0;o<t;o++)n[o]=arguments[o];n.length<1?(e.blacklist=[],e.whitelist=[]):(e.blacklist&&(e.blacklist=e.blacklist.filter(function(t){return n.every(function(e){return!t.test(e)})})),e.whitelist&&(e.whitelist=[].concat(l(e.whitelist),l(n.map(function(t){var r=".*"+t.replace(a,"\\$&")+".*";return e.whitelist.find(function(t){return t.toString()===r.toString()})?null:new RegExp(r)}).filter(Boolean)))));for(var s=document.querySelectorAll('script[type="javascript/blocked"]'),u=0;u<s.length;u++){var p=s[u];i(p)&&(p.type="application/javascript",r.blacklisted.push(p),p.parentElement.removeChild(p))}var d=0;[].concat(l(r.blacklisted)).forEach(function(t,e){if(i(t)){var n=document.createElement("script");n.setAttribute("src",t.src),n.setAttribute("type","application/javascript"),document.head.appendChild(n),r.blacklisted.splice(e-d,1),d++}}),e.blacklist&&e.blacklist.length<1&&c.disconnect()},Object.defineProperty(t,"__esModule",{value:!0})}); 
+</script>
+
+
+<script type="text/javascript" defer>
+  var script_loaded=!1;function loadJSscripts(){script_loaded||(void 0!==uLTS&&uLTS.disconnect(),void 0!==window.yett&&window.yett.unblock(),script_loaded=!0,document.querySelectorAll("iframe[data-src], script[data-src]").forEach(t=>{datasrc=t.dataset.src,null!=datasrc&&(t.src=datasrc)}),document.querySelectorAll("link[data-href]").forEach(t=>{datahref=t.dataset.href,null!=datahref&&(t.href=datahref)}),document.querySelectorAll("script[type='text/lazyload']").forEach(t=>{var e=document.createElement("script");for(a=0;a<t.attributes.length;a++){var r=t.attributes[a];e.setAttribute(r.name,r.value)}e.type="text/javascript",e.innerHTML=t.innerHTML,t.parentNode.insertBefore(e,t),t.parentNode.removeChild(t)}),document.dispatchEvent(new CustomEvent("asyncLazyLoad")),setTimeout(function(){document.dispatchEvent(new CustomEvent("loadBarInjector"))},3e3))}var activityEvents=["mousedown","mousemove","keydown","scroll","touchstart","click","keypress","touchmove"];activityEvents.forEach(function(t){window.addEventListener(t,loadJSscripts,!1)});  
+</script>
+
+
+
+----content for header
+
+  {%unless template == 'index'%}
+
+    {{ content_for_header }}
+
+  {%else%}
+
+      {%include 'content_for_header'%}
+
+  {%endunless%}
+
+===================================================================
+
+for add variant anchor tag  according to there color
+
+
+<style>
+/* ps css  variant*/
+  .product-form__input {
+    font-size: 13px;
+    letter-spacing: 0;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.custom-color-swatches {
+    display: flex;
+}
+.product-form__input legend.form__label {
+    font-weight: 700;
+    color: #000;
+}
+label.add_active_class {
+    border: 1px solid black !important;
+}
+.product-form__label .tooltip {
+    color: #fff;
+    background: #000;
+}
+.custom-color-swatches .tooltip:before {
+    content: "";
+  colol: #fff;
+
+}
+
+  .custom-color-swatches .tooltip:after {
+    border-left: solid transparent 7px;
+    border-right: solid transparent 7px;
+    border-top: solid #000 7px;
+    bottom: -7px;
+    content: " ";
+    height: 0;
+    left: 50%;
+    -moz-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -webkit-transform: translateX(-50%);
+    transform: translate(-50%);
+    position: absolute;
+    width: 0;
+}
+
+.custom-swatch-el{
+    pointer-events: none !important;
+  }
+  a.product-var-link:hover .tooltip {
+    display: block;
+}
+</style>
+
+
+{%- liquid 
+    assign picker_type = block.settings.picker_type
+    assign enable_border_top = block.settings.enable_border_top
+    assign enable_border_bottom = block.settings.enable_border_bottom
+    assign color_border = block.settings.color_border
+   
+-%}
+{% assign variant_pro = product.metafields.custom.color_swatch_products.value %}  
+<div class="productView-options{% if enable_border_top %} has-border-top{% endif %}{% if enable_border_bottom %} has-border-bottom{% endif %}" style="--color-border: {{ color_border }}">
+    {%- if variantCount > 0  and product.has_only_default_variant != true -%}        
+      <div class="productView-variants halo-productOptions" id="product-option-{{ product.id }}"  data-type="{{ picker_type }}">
+            {%- if picker_type == 'button' -%}
+                {%- assign product_swatch_option = settings.swatch | downcase -%}
+                <variant-radios class="no-js-hidden product-option has-default" data-product="{{ product.id }}" data-section="{{ section.id }}" data-url="{{ product.url }}">
+                    {%- for option in product.options_with_values -%}
+                        {%- liquid
+                            assign is_swatch = false
+                            assign option_name = option.name | downcase
+                            if product_swatch_option contains option_name
+                                assign is_swatch = true
+                            endif
+                            assign swatch_type = settings.swatch_type
+                            assign option_index = forloop.index0
+                            assign file_extension = 'png'
+                        -%}
+                        <fieldset class="js product-form__input{% if is_swatch %} product-form__swatch{% endif %} clearfix option-{{ option.name | handle }}" data-product-attribute="set-rectangle" data-option-index="{{ forloop.index0 }}">
+                            <legend class="form__label">
+                                {{ option.name | append: ':' }}
+                                <span data-header-option>
+                                    {{ option.selected_value }}
+                                </span>
+                            </legend>
+                            {%- assign values = '' -%}
+                            {%- liquid
+                                assign variants_available_arr = product.variants | map: 'available'
+                                assign variants_option1_arr = product.variants | map: 'option1'
+                                assign variants_option2_arr = product.variants | map: 'option2'
+                                assign variants_option3_arr = product.variants | map: 'option3'
+                            -%}
+                            {%- for variant in product.variants -%}
+                                {%- assign value = variant.options[option_index] -%}
+                                {%- unless values contains value -%}
+                                    {%- liquid
+                                        assign values = values | join: ';'
+                                        assign values = values | append: ';' | append: value
+                                        assign values = values | split: ';'
+                                        assign option_stock = 'soldout'
+
+                                        for option1_name in variants_option1_arr
+                                            case option.position
+                                                when 1
+                                                    if variants_option1_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+                                                        assign option_stock = 'available'
+                                                    endif
+                                                when 2
+                                                    if option1_name == product.selected_or_first_available_variant.option1 and variants_option2_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+                                                        assign option_stock = 'available'
+                                                    endif
+                                                when 3
+                                                    if option1_name == product.selected_or_first_available_variant.option1 and variants_option2_arr[forloop.index0] == product.selected_or_first_available_variant.option2 and variants_option3_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+                                                        assign option_stock = 'available'
+                                                    endif
+                                            endcase
+                                        endfor
+                                    -%}
+                                    <input class="product-form__radio" type="radio" id="option-{{ product.id }}-{{ option.name }}-{{ forloop.index0 }}"
+                                        name="{{ option.name }}"
+                                        value="{{ value | escape }}"
+                                        {% if option.selected_value == value %}checked{% endif %}
+                                        {% if is_swatch and show_variant_image_group %}data-filter=".filter-{{ value | handle }}"{% endif %}
+                                        data-variant-id="{{ variant.id }}"
+                                    >
+                                    {%- if is_swatch -%}
+                                           <div class="custom-color-swatches">
+                     {% for prod in variant_pro %}
+                      <a class="product-var-link" href="{{ prod.url }}"> 
+                       <div data-value="{{ prod.metafields.custom.product_color_name }}" class="custom-swatch-el swatch-element color {{ prod.metafields.custom.product_color_name }} ">            
+
+                       <label style="background-color: plaid; background-image: url('{{ prod.metafields.custom.product_color_image.value | img_url : '50x50' }}')" for="swatch-0-{{ prod.metafields.custom.product_color_name }}" class="{% if prod.id == product.id %}add_active_class{% endif %}  product-form__label {{ option_stock }}">                         
+                       <div class="tooltip"> {{ prod.metafields.custom.product_color_name }} 
+                        </div> </label>                   
+                         <input id="swatch-0-{{ prod.metafields.custom.product_color_name }}" type="radio" name="option-0" value="{{ prod.metafields.custom.product_color_name }}">                      
+               
+                      </div>
+                        </a>
+                    {% endfor %}
+                      </div>
+
+                                    {%- else -%}   
+                                        <label class="product-form__label {{ option_stock }}" for="option-{{ product.id }}-{{ option.name }}-{{ forloop.index0 }}" data-variant-id="{{ variant.id }}">
+                                            <span class="text">{{ value }} <br>{% if option.name == "Size" %}<p>{{ variant.metafields.c_f.size_detail }}</p>{% endif %}</span> 
+                                        </label>
+                                    {%- endif -%}
+                                {%- endunless -%}
+                            {%- endfor -%}
+                        </fieldset>
+                    {%- endfor -%}
+                    <script type="application/json">
+                        {{ product.variants | json }}
+                    </script>
+                </variant-radios>
+            {%- else -%}
+                <variant-selects class="no-js-hidden product-option has-default" data-product="{{ product.id }}" data-section="{{ section.id }}" data-url="{{ product.url }}">
+                    {%- for option in product.options_with_values -%}
+                        <div class="product-form__input product-form__input--dropdown" data-product-attribute="set-select" data-option-index="{{ forloop.index0 }}">
+                            <label class="form__label" for="option-{{ forloop.index0 }}">
+                                {{ option.name | append: ':' }}
+                                <span data-header-option>
+                                    {{ option.selected_value }}
+                                </span>
+                            </label>
+                            <div class="form__select select">
+                                <select id="option-{{ forloop.index0 }}"
+                                    class="select__select"
+                                    name="options[{{ option.name | escape }}]"
+                                >
+                                    {%- for value in option.values -%}
+                                        <option value="{{ value | escape }}" {% if option.selected_value == value %}selected="selected"{% endif %}>
+                                            {{ value }}
+                                        </option>
+                                    {%- endfor -%}
+                                </select>
+                            </div>
+                        </div>
+                    {%- endfor -%}
+                    <script type="application/json">
+                        {{ product.variants | json }}
+                    </script>
+                </variant-selects>
+            {%- endif -%}
+        </div>
+        <noscript>
+            <div class="product-form__input{% if product.has_only_default_variant %} hidden{% endif %}">
+                <label class="form__label" for="Variants-{{ section.id }}">
+                    {{ 'products.product.product_variants' | t }}
+                </label>
+                <div class="select">
+                <select name="id" id="Variants-{{ section.id }}" class="select__select" form="product-form">
+                    {%- for variant in product.variants -%}
+                        <option
+                            {% if variant == product.selected_or_first_available_variant %}selected="selected"{% endif %}
+                            {% if variant.available == false %}disabled{% endif %}
+                            value="{{ variant.id }}"
+                        >
+                            {{ variant.title }}
+                            {%- if variant.available == false %} - {{ 'products.product.sold_out' | t }}{% endif %}
+                            - {{ variant.price | money | strip_html }}
+                        </option>
+                    {%- endfor -%}
+              </select>
+            </div>
+          </div>
+        </noscript>
+
+    {%- endif -%}
+    
+</div>
+
+
+=======================================================================
